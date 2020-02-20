@@ -7,8 +7,7 @@ import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.ReactContext;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInApi;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.fitness.FitnessOptions;
 
 public class GoogleSignInManager implements ActivityEventListener {
@@ -43,6 +42,26 @@ public class GoogleSignInManager implements ActivityEventListener {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Force request GoogleFit API via GoogleSignIn
+     *
+     * @param activity
+     * @param listener
+     * @return false if already signed in
+     */
+    public boolean forceRequest(Activity activity, FitnessOptions fitnessOptions, ResultListener listener) {
+        mListener = listener;
+
+        GoogleSignIn.getClient(activity, new GoogleSignInOptions.Builder().build()).signOut();
+
+        GoogleSignIn.requestPermissions(
+                activity,
+                REQUEST_OAUTH_REQUEST_CODE,
+                null,
+                fitnessOptions);
+        return true;
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.ybrain.rn.googlefitness;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -113,6 +113,33 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
     }
 
     @ReactMethod
+    public void forceRequest(String fitnessOptionJsonStr, final Promise promise) {
+        FitnessOptions fitnessOptions = null;
+        try {
+            fitnessOptions = (FitnessOptions) StatementFactory
+                    .fromJson(fitnessOptionJsonStr)
+                    .execute(new JavaContext(), null);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to create FitnessOptions", e);
+            promise.reject(e);
+            return;
+        }
+
+        if (!mGoogleSignInManager.forceRequest(getCurrentActivity(), fitnessOptions, new GoogleSignInManager.ResultListener() {
+            @Override
+            public void onResult(int resultCode) {
+                if (resultCode == Activity.RESULT_OK) {
+                    promise.resolve("SUCCESS");
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    promise.resolve("CANCELED");
+                }
+            }
+        })) {
+            promise.resolve("ALREADY_SIGNED_IN");
+        }
+    }
+
+    @ReactMethod
     public void hasPermissions(String fitnessOptionJsonStr, Promise promise) {
         if (GoogleSignIn.getLastSignedInAccount(mReactContext) == null) {
             promise.resolve(false);
@@ -123,7 +150,8 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
             FitnessOptions fitnessOptions = (FitnessOptions) StatementFactory
                     .fromJson(fitnessOptionJsonStr)
                     .execute(new JavaContext(), null);
-            promise.resolve(GoogleSignIn.hasPermissions(getLastSignedInAccountSafely(), fitnessOptions));
+            boolean perm = GoogleSignIn.hasPermissions(getLastSignedInAccountSafely(), fitnessOptions);
+            promise.resolve(perm);
         } catch (Exception e) {
             Log.e(TAG, "Failed to create FitnessOptions", e);
             promise.reject(e);

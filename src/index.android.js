@@ -7,6 +7,7 @@ type NativeGoogleFit = {
     isGooglePlayServicesAvailable: void => Promise<$Values<ConnectionResult>>,
     showGooglePlayServiceErrorDialog: ConnectionResult => Promise<boolean>,
     requestPermissions: string => Promise<SignInResult>,
+    forceRequest: string => Promise<SignInResult>,
     hasPermissions: string => Promise<boolean>,
     disableFit: void => Promise<void>,
     history_insertData: string => Promise<void>,
@@ -105,6 +106,16 @@ export default {
      */
     requestPermissions(fitnessOptions: Statement): Promise<SignInResult> {
         return fitness.requestPermissions(fitnessOptions.stringify());
+    },
+
+    /**
+     * Request Google-fit permission for this application
+     *
+     * @param fitnessOptions Permission options to request. Build using FitnessOptions
+     * @returns {Promise<SignInResult>}
+     */
+    forceRequest(fitnessOptions: Statement): Promise<SignInResult> {
+        return fitness.forceRequest(fitnessOptions.stringify());
     },
 
     hasPermissions(fitnessOptions: Statement): Promise<boolean> {
